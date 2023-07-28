@@ -1,0 +1,2 @@
+add_executable(udf_holder udf_holder.cc)
+target_compile_features(udf_holder PRIVATE cxx_std_17)
