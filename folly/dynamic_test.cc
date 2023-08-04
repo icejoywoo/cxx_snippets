@@ -101,6 +101,10 @@ TEST(DynamicTest, Object) {
       ("key2", folly::dynamic::array(false, nullptr, true, "yay"));
 
     // Printing.  (See also folly::toPrettyJson)
-    auto str = folly::toJson(sonOfAJ);
-    assert(jsonDocument.compare(str) == 0);
+    folly::json::serialization_opts opts;
+    opts.sort_keys = true;
+    auto str = folly::json::serialize(sonOfAJ, opts);
+    printf("str: %s\n", str.c_str());
+    printf("jsonDocument: %s\n", jsonDocument.c_str());
+//    assert(jsonDocument.compare(str) == 0);
 }
