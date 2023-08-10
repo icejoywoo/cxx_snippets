@@ -1,5 +1,6 @@
 add_executable(folly_unit_test
-    dynamic_test.cc)
+    dynamic_test.cc
+    compression_test.cc)
 target_link_libraries(folly_unit_test PRIVATE
     Folly::folly
     GTest::gtest
