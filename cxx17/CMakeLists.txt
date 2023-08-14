@@ -1,6 +1,7 @@
 add_executable(cxx_unit_test
     function_test.cc
-    mutex_test.cc)
+    mutex_test.cc
+    ptr_test.cc)
 target_link_libraries(cxx_unit_test PRIVATE
     GTest::gtest
     GTest::gtest_main)
