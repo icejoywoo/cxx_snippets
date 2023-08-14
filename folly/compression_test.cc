@@ -4,8 +4,17 @@
 #include "folly/io/IOBuf.h"
 #include "folly/String.h"
 
-TEST(CompressionTest, Lz4) {
+// https://stackoverflow.com/a/6256846
+class CompressionTest : public ::testing::TestWithParam<folly::io::CodecType> {
+  // You can implement all the usual fixture class members here.
+  // To access the test parameter, call GetParam() from class
+  // TestWithParam<T>.
+};
+
+TEST_P(CompressionTest, Lz4) {
     using namespace folly;
+    // Call GetParam() here to get the Row values
+    io::CodecType const& p = GetParam();
     // LZ4, LZ4_FRAME, LZ4_VARINT_SIZE
     std::unique_ptr<io::Codec> codec = io::getCodec(io::CodecType::LZ4);
     
@@ -29,7 +38,7 @@ TEST(CompressionTest, Lz4) {
     assert(out2 == input);
 }
 
-TEST(CompressionTest, Snappy) {
+TEST_F(CompressionTest, Snappy) {
     using namespace folly;
     // LZ4, LZ4_FRAME, LZ4_VARINT_SIZE
     std::unique_ptr<io::Codec> codec = io::getCodec(io::CodecType::SNAPPY);
@@ -53,3 +62,9 @@ TEST(CompressionTest, Snappy) {
     std::cout << "uncompressed: " << out2 << std::endl;
     assert(out2 == input);
 }
+
+INSTANTIATE_TEST_CASE_P(Lz4, CompressionTest, ::testing::Values(
+  folly::io::CodecType::LZ4,
+  folly::io::CodecType::LZ4_FRAME,
+  folly::io::CodecType::LZ4_VARINT_SIZE
+));
