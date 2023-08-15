@@ -29,13 +29,27 @@ TEST_P(CompressionTest, Lz4) {
     std::cout << "compressed: " << hexlify(out) << std::endl;
     std::cout << "compressed: " << out << std::endl;
 
-    std::unique_ptr<IOBuf> uncompressedBuf = codec->uncompress(compressedBuf.get(), input.size());
-    std::string out2;
-    for(auto& b : *uncompressedBuf) {
-        out2.append(b.begin(), b.end());
+    {
+        std::unique_ptr<IOBuf> uncompressedBuf = codec->uncompress(compressedBuf.get(), input.size());
+        std::string out2;
+        for(auto& b : *uncompressedBuf) {
+            out2.append(b.begin(), b.end());
+        }
+        std::cout << "uncompressed: " << out2 << std::endl;
+        assert(out2 == input);
     }
-    std::cout << "uncompressed: " << out2 << std::endl;
-    assert(out2 == input);
+
+    {
+        // airlift lz4 compressed test
+        compressedBuf = IOBuf::copyBuffer(folly::unhexlify("e161626364655f626364656667685f0e00a066676878787878787878"));
+        std::unique_ptr<IOBuf> uncompressedBuf = codec->uncompress(compressedBuf.get(), input.size());
+        std::string out2;
+        for(auto& b : *uncompressedBuf) {
+            out2.append(b.begin(), b.end());
+        }
+        std::cout << "uncompressed: " << out2 << std::endl;
+        assert(out2 == input);
+    }
 }
 
 TEST_F(CompressionTest, Snappy) {
