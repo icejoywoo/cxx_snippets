@@ -16,7 +16,7 @@ TEST_P(CompressionTest, Lz4) {
     // Call GetParam() here to get the Row values
     io::CodecType const& p = GetParam();
     // LZ4, LZ4_FRAME, LZ4_VARINT_SIZE
-    std::unique_ptr<io::Codec> codec = io::getCodec(io::CodecType::LZ4);
+    std::unique_ptr<io::Codec> codec = io::getCodec(io::CodecType::LZ4, io::COMPRESSION_LEVEL_FASTEST);
     
     const std::string input("abcde_bcdefgh_abcdefghxxxxxxx");
     std::unique_ptr<IOBuf> buf = IOBuf::copyBuffer(input);
