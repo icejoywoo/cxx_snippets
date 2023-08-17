@@ -7,6 +7,7 @@
  * 2. https://leetcode.cn/problems/surrounded-regions/
  */
 
+namespace d2 {
 class UnionFind {
 public:
     UnionFind(std::vector<std::vector<char>>& grid) {
@@ -70,6 +71,34 @@ private:
     int n; // columns
     int count;
 };
+} // namespace d2
+
+namespace d1 {
+// https://leetcode.cn/problems/satisfiability-of-equality-equations/
+class UnionFind {
+public:
+    UnionFind() {
+        roots.resize(26);
+        for (int i = 0; i < 26; i++) {
+            roots[i] = i;
+        }
+    }
+
+    int find(int index) {
+        if (index == roots[index]) {
+            return index;
+        }
+        roots[index] = find(roots[index]);
+        return roots[index];
+    }
+
+    void unite(int index1, int index2) {
+        roots[find(index1)] = find(index2);
+    }
+private:
+    std::vector<int> roots;
+};
+} // namespace d1
 
 TEST(UnionFindTest, Basic) {
     std::vector<std::vector<char>> grid{
@@ -79,7 +108,7 @@ TEST(UnionFindTest, Basic) {
         {'0', '0', '0', '0', '0'}
     };
 
-    UnionFind uf(grid);
+    d2::UnionFind uf(grid);
     EXPECT_EQ(9, uf.getCount());
 
     std::vector<std::pair<int, int>> directions{
