@@ -34,6 +34,8 @@ TEST(HasherTest, Basic) {
     }
     std::cout << "hash array: " << hashArray<int>({0, 1, 2, 3, 4}) << std::endl;
     // 4971740975845359195
+    std::cout << "hash string array: " << hashArray<std::string>({"0", "1", "2", "3", "4"}) << std::endl;
+    // 17820802234886935425
     std::cout << "hash row: " << hashRow<int>({0, 1, 2, 3, 4}) << std::endl;
     // 8795432144090112219
     std::cout << "hash map: " << hashMap<int, int>({{1, 1}, {2, 2}}) << std::endl;
