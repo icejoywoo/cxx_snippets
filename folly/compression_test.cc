@@ -4,6 +4,8 @@
 #include "folly/io/IOBuf.h"
 #include "folly/String.h"
 
+#include "my_lz4.hpp"
+
 // https://stackoverflow.com/a/6256846
 class CompressionTest : public ::testing::TestWithParam<folly::io::CodecType> {
   // You can implement all the usual fixture class members here.
@@ -82,3 +84,26 @@ INSTANTIATE_TEST_CASE_P(Lz4, CompressionTest, ::testing::Values(
   folly::io::CodecType::LZ4_FRAME,
   folly::io::CodecType::LZ4_VARINT_SIZE
 ));
+
+TEST_F(CompressionTest, MyLz4SimpleTest) {
+    const std::string input("abcde_bcdefgh_abcdefghxxxxxxx");
+    uint32_t output_length = my::lz4::compressor::maxCompressedLength(input.length());
+    auto* output = new uint8_t[output_length];
+    memset(output, 0, output_length);
+    int actualCompressedLength = my::lz4::compressor::compress(
+            (uint8_t*) input.data(), 0, input.length(),
+            output, 0, output_length);
+
+    std::string compressed_str = folly::ByteRange(output, actualCompressedLength).str();
+    std::string output_str = folly::hexlify(compressed_str);
+    EXPECT_STREQ("e161626364655f626364656667685f0e00a066676878787878787878", output_str.c_str());
+
+    uint32_t uncompressed_length = input.length();
+    auto* uncompressed_buffer = new uint8_t[uncompressed_length];
+    memset(uncompressed_buffer, 0, uncompressed_length);
+    int actualUncompressedSize = my::lz4::decompressor::decompress(
+            (uint8_t*) compressed_str.data(), 0, compressed_str.length(),
+            uncompressed_buffer, 0, uncompressed_length);
+
+    EXPECT_STREQ(input.c_str(), folly::ByteRange(uncompressed_buffer, actualUncompressedSize).str().c_str());
+}
