@@ -225,13 +225,13 @@ uint64_t hashArray(
 template <typename Key, typename Value>
 uint64_t hashMap(
     const std::map<Key, Value>& elements) {
-  std::vector<Key> keys(elements.size());
-  std::vector<Value> values(elements.size());
+  std::vector<Key> keys;
+  std::vector<Value> values;
   for (auto& [key, value] : elements) {
     keys.emplace_back(key);
     values.emplace_back(value);
   }
-  return hashArray(hashArray(nullHash, keys), values);
+  return hashArray<Value>(hashArray<Key>(nullHash, keys), values);
 }
 
 template <typename T>
@@ -241,11 +241,9 @@ uint64_t hashRow(
   bool isFirst = true;
   for (auto i = 0; i < elements.size(); ++i) {
     auto element = elements[i];
-    if (element) {
-      auto elementHash = hasher<T>{}(element);
-      hash = isFirst ? elementHash : hashMix(hash, elementHash);
-      isFirst = false;
-    }
+    auto elementHash = hasher<T>{}(element);
+    hash = isFirst ? elementHash : hashMix(hash, elementHash);
+    isFirst = false;
   }
   return hash;
 }

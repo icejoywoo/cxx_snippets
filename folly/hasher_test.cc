@@ -29,9 +29,17 @@ TEST(HasherTest, Basic) {
     // string_view
     EXPECT_EQ(hasher<std::string_view>{}(input), folly::hasher<std::string_view>{}(input));
 
-    std::cout << "hash array: " << hashArray<int>({1, 2, 3, 4, 5}) << std::endl;
-    std::cout << "hash row: " << hashRow<int>({1, 2, 3, 4, 5}) << std::endl;
+    for (int i : {0, 1, 2, 3, 4}) {
+      std::cout << "hash " << i << ": " << hasher<int>{}(i) << std::endl;
+    }
+    std::cout << "hash array: " << hashArray<int>({0, 1, 2, 3, 4}) << std::endl;
+    // 4971740975845359195
+    std::cout << "hash row: " << hashRow<int>({0, 1, 2, 3, 4}) << std::endl;
+    // 8795432144090112219
     std::cout << "hash map: " << hashMap<int, int>({{1, 1}, {2, 2}}) << std::endl;
+    // 14742748263231395393
+    std::cout << "hash map: " << hashMap<int, int>({{2, 102}, {3, 103}}) << std::endl;
+    // 18340151164760653449
 }
 
 // presto hash implementation

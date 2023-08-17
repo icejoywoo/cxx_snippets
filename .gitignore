@@ -1,2 +1,6 @@
 .vscode
 build
+# clangd index
+.cache/clangd/index
+.idea
+target
