@@ -5,7 +5,7 @@ project(velox_snippets)
 # enable FetchContent
 include(FetchContent)
 
-list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
+list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # Include our ThirdPartyToolchain dependencies macros
 include(ResolveDependency)
