@@ -7,7 +7,7 @@ env:
   BUILD_TYPE: Release
   GENERATOR: Ninja
   PARALLEL: 16
-  CMAKE_ARGS: -DRELEASE_ENABLE_O3=ON -DBUILD_WITH_LLVM=ON
+  CMAKE_ARGS: -DRELEASE_ENABLE_O3=ON -DBUILD_WITH_LLVM=ON -DBoost_SOURCE=BUNDLED
 
 jobs:
   # https://github.com/actions/starter-workflows/blob/main/ci/cmake.yml
@@ -38,7 +38,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
   macos-build:
-    if: ${{ false }}
+#    if: ${{ false }}
     runs-on: macos-latest
     steps:
       - name: Checkout
