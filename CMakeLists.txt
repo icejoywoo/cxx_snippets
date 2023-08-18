@@ -74,7 +74,18 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googlebenchmark)
 
+# for generated pb.h
+include_directories(${CMAKE_BINARY_DIR})
+
+# failed to build icu from source
+# set_source(ICU)
+# resolve_dependency(ICU)
+set(ICU_SOURCE SYSTEM)
+add_subdirectory(velox)
+include_directories(velox)
+
 add_subdirectory(cxx17)
 add_subdirectory(template)
 add_subdirectory(folly)
 add_subdirectory(algorithm)
+add_subdirectory(velox_)
