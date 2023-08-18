@@ -24,7 +24,7 @@ TEST_F(ComplexVectorHasherTest, arrayVector) {
     std::fill(hashes.begin(), hashes.end(), 0);
     hasher->hash(rows, false, hashes);
     std::cout << "{0, 1, 2, 3, 4} hash:" << hashes[len - 1] << std::endl;
-    EXPECT_EQ(4971740975845359195, hashes[len-1]);
+    EXPECT_EQ(4971740975845359195UL, hashes[len-1]);
   }
   {
     int len = 5;
@@ -43,7 +43,7 @@ TEST_F(ComplexVectorHasherTest, arrayVector) {
     std::fill(hashes.begin(), hashes.end(), 0);
     hasher->hash(rows, false, hashes);
     std::cout << "{'0', '1', '2', '3', '4'} hash:" << hashes[len - 1] << std::endl;
-    EXPECT_EQ(17820802234886935425, hashes[len-1]);
+    EXPECT_EQ(17820802234886935425UL, hashes[len-1]);
   }
 }
 
@@ -64,7 +64,7 @@ TEST_F(ComplexVectorHasherTest, rowVector) {
   raw_vector<uint64_t> hashes(len);
   std::fill(hashes.begin(), hashes.end(), 0);
   hasher->hash(rows, false, hashes);
-  EXPECT_EQ(8795432144090112219, hashes[len-1]);
+  EXPECT_EQ(8795432144090112219UL, hashes[len-1]);
 }
 
 TEST_F(ComplexVectorHasherTest, mapVector) {
@@ -83,6 +83,6 @@ TEST_F(ComplexVectorHasherTest, mapVector) {
   raw_vector<uint64_t> hashes(len);
   std::fill(hashes.begin(), hashes.end(), 0);
   hasher->hash(rows, false, hashes);
-  EXPECT_EQ(14742748263231395393, hashes[0]);
-  EXPECT_EQ(18340151164760653449, hashes[1]);
+  EXPECT_EQ(14742748263231395393UL, hashes[0]);
+  EXPECT_EQ(18340151164760653449UL, hashes[1]);
 }
