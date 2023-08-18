@@ -7,6 +7,19 @@ include(FetchContent)
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
+execute_process(
+        COMMAND
+        bash -c
+        "( source ${CMAKE_CURRENT_SOURCE_DIR}/velox/scripts/setup-helper-functions.sh && echo -n $(get_cxx_flags $ENV{CPU_TARGET}))"
+        OUTPUT_VARIABLE SCRIPT_CXX_FLAGS
+        RESULT_VARIABLE COMMAND_STATUS)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+message("Appending CMAKE_CXX_FLAGS with ${SCRIPT_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SCRIPT_CXX_FLAGS}")
+
+
 # Include our ThirdPartyToolchain dependencies macros
 include(ResolveDependency)
 

@@ -7,7 +7,9 @@ env:
   BUILD_TYPE: Release
   GENERATOR: Ninja
   PARALLEL: 16
-  CMAKE_ARGS: -DRELEASE_ENABLE_O3=ON -DBUILD_WITH_LLVM=ON -DBoost_SOURCE=BUNDLED
+  CMAKE_ARGS: -DBoost_SOURCE=BUNDLED
+  # deps
+  Boost_SOURCE: BUNDLED
 
 jobs:
   # https://github.com/actions/starter-workflows/blob/main/ci/cmake.yml
