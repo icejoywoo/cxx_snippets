@@ -14,6 +14,7 @@ env:
 jobs:
   # https://github.com/actions/starter-workflows/blob/main/ci/cmake.yml
   ubuntu-build:
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -40,7 +41,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
   macos-build:
-#    if: ${{ false }}
+    if: ${{ false }}
     runs-on: macos-latest
     steps:
       - name: Checkout

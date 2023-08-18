@@ -222,6 +222,13 @@ uint64_t hashArray(
   return hashArray(nullHash, elements);
 }
 
+template <typename T>
+struct hasher<std::vector<T>> {
+  size_t operator()(const std::vector<T>& elements) const {
+    return hashArray(elements);
+  }
+};
+
 template <typename Key, typename Value>
 uint64_t hashMap(
     const std::map<Key, Value>& elements) {
@@ -233,6 +240,13 @@ uint64_t hashMap(
   }
   return hashArray<Value>(hashArray<Key>(nullHash, keys), values);
 }
+
+template <typename Key, typename Value>
+struct hasher<std::map<Key, Value>> {
+  size_t operator()(const std::map<Key, Value>& elements) const {
+    return hashMap(elements);
+  }
+};
 
 template <typename T>
 uint64_t hashRow(

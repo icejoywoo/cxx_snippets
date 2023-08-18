@@ -33,14 +33,18 @@ TEST(HasherTest, Basic) {
       std::cout << "hash " << i << ": " << hasher<int>{}(i) << std::endl;
     }
     std::cout << "hash array: " << hashArray<int>({0, 1, 2, 3, 4}) << std::endl;
+    std::cout << "hash array: " << hasher<std::vector<int>>{}({0, 1, 2, 3, 4}) << std::endl;
     // 4971740975845359195
     std::cout << "hash string array: " << hashArray<std::string>({"0", "1", "2", "3", "4"}) << std::endl;
+    std::cout << "hash string array: " << hasher<std::vector<std::string>>{}({"0", "1", "2", "3", "4"}) << std::endl;
     // 17820802234886935425
     std::cout << "hash row: " << hashRow<int>({0, 1, 2, 3, 4}) << std::endl;
     // 8795432144090112219
     std::cout << "hash map: " << hashMap<int, int>({{1, 1}, {2, 2}}) << std::endl;
+    std::cout << "hash map: " << hasher<std::map<int, int>>{}({{1, 1}, {2, 2}}) << std::endl;
     // 14742748263231395393
     std::cout << "hash map: " << hashMap<int, int>({{2, 102}, {3, 103}}) << std::endl;
+    std::cout << "hash map: " << hasher<std::map<int, int>>{}({{2, 102}, {3, 103}}) << std::endl;
     // 18340151164760653449
 }
 
