@@ -16,3 +16,9 @@ add_library(spooky_hash
     SpookyV2.cpp)
 
 add_test(folly_unit_test folly_unit_test)
+
+add_executable(hasher_benchmark hasher_benchmark.cc)
+target_link_libraries(hasher_benchmark PRIVATE
+    Folly::folly
+    ${FOLLY_BENCHMARK_STATIC_LIB}
+    spooky_hash)
