@@ -1,7 +1,8 @@
 #include "folly/Benchmark.h"
 #include "folly/hash/Hash.h"
 
-#include "my_hasher.hpp"
+#include "velox_hasher.hpp"
+#include "presto_hasher.hpp"
 
 /// https://github.com/facebook/folly/blob/main/folly/docs/Benchmark.md
 BENCHMARK(follyHasher, n) {
@@ -9,9 +10,15 @@ BENCHMARK(follyHasher, n) {
         folly::hasher<int>{}(i);
     }
 }
-BENCHMARK_RELATIVE(myHasher, n) {
+BENCHMARK_RELATIVE(veloxHasher, n) {
     for (unsigned int i = 0; i < n; ++i) {
-        hasher<int>{}(i);
+        velox::hash::hasher<int>{}(i);
+    }
+}
+
+BENCHMARK_RELATIVE(prestoHasher, n) {
+    for (unsigned int i = 0; i < n; ++i) {
+        presto::hash::hasher<int>{}(i);
     }
 }
 
