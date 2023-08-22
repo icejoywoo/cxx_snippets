@@ -6,18 +6,19 @@
 #include <string>
 #include <vector>
 
+namespace velox::hash {
 // copied from folly
-
-// helper
+namespace {
 struct to_unsigned_fn {
-  template <typename..., typename T>
-  constexpr auto operator()(T const& t) const noexcept ->
-      typename std::make_unsigned<T>::type {
-    using U = typename std::make_unsigned<T>::type;
-    return static_cast<U>(t);
-  }
+    template<typename..., typename T>
+    constexpr auto operator()(T const &t) const noexcept ->
+            typename std::make_unsigned<T>::type {
+        using U = typename std::make_unsigned<T>::type;
+        return static_cast<U>(t);
+    }
 };
 constexpr to_unsigned_fn to_unsigned{};
+}
 
 // Order-independent way to reduce multiple 64 bit hashes into a
 // single hash. Copied from folly/hash/Hash.h because this is not
@@ -103,10 +104,29 @@ constexpr uint64_t hash_128_to_64(__uint128_t u) {
     return hash_128_to_64(hi, lo);
 }
 
-
+namespace detail {
+template <typename Int>
+struct integral_hasher {
+constexpr size_t operator()(Int const& i) const noexcept {
+    static_assert(sizeof(Int) <= 16, "Input type is too wide");
+    /* constexpr */ if (sizeof(Int) <= 4) {
+        auto const i32 = static_cast<int32_t>(i); // impl accident: sign-extends
+        auto const u32 = static_cast<uint32_t>(i32);
+        return static_cast<size_t>(jenkins_rev_mix32(u32));
+    } else if (sizeof(Int) <= 8) {
+        auto const u64 = static_cast<uint64_t>(i);
+        return static_cast<size_t>(twang_mix64(u64));
+    } else {
+        auto const u = to_unsigned(i);
+        auto const hi = static_cast<uint64_t>(u >> sizeof(Int) * 4);
+        auto const lo = static_cast<uint64_t>(u);
+        return hash_128_to_64(hi, lo);
+    }
+}
+};
+}
 
 // float
-// copied from folly
 template <typename F>
 struct float_hasher {
   size_t operator()(F const& f) const noexcept {
@@ -141,25 +161,45 @@ struct Hash {
   constexpr size_t operator()() const noexcept { return 0; }
 };
 
+template <>
+struct hasher<unsigned long long>
+    : detail::integral_hasher<unsigned long long> {};
 
-template <typename Int>
-struct hasher {
-  constexpr size_t operator()(Int const& i) const noexcept {
-    static_assert(sizeof(Int) <= 16, "Input type is too wide");
-    /* constexpr */ if (sizeof(Int) <= 4) {
-      auto const i32 = static_cast<int32_t>(i); // impl accident: sign-extends
-      auto const u32 = static_cast<uint32_t>(i32);
-      return static_cast<size_t>(jenkins_rev_mix32(u32));
-    } else if (sizeof(Int) <= 8) {
-      auto const u64 = static_cast<uint64_t>(i);
-      return static_cast<size_t>(twang_mix64(u64));
-    } else {
-      auto const u = to_unsigned(i);
-      auto const hi = static_cast<uint64_t>(u >> sizeof(Int) * 4);
-      auto const lo = static_cast<uint64_t>(u);
-      return hash_128_to_64(hi, lo);
-    }
-  }
+template <>
+struct hasher<signed long long> : detail::integral_hasher<signed long long> {};
+
+template <>
+struct hasher<unsigned long> : detail::integral_hasher<unsigned long> {};
+
+template <>
+struct hasher<signed long> : detail::integral_hasher<signed long> {};
+
+template <>
+struct hasher<unsigned int> : detail::integral_hasher<unsigned int> {};
+
+template <>
+struct hasher<signed int> : detail::integral_hasher<signed int> {};
+
+template <>
+struct hasher<unsigned short> : detail::integral_hasher<unsigned short> {};
+
+template <>
+struct hasher<signed short> : detail::integral_hasher<signed short> {};
+
+template <>
+struct hasher<unsigned char> : detail::integral_hasher<unsigned char> {};
+
+template <>
+struct hasher<signed char> : detail::integral_hasher<signed char> {};
+
+template <> // char is a different type from both signed char and unsigned char
+struct hasher<char> : detail::integral_hasher<char> {};
+
+template <>
+struct hasher<signed __int128> : detail::integral_hasher<signed __int128> {};
+
+template <>
+struct hasher<unsigned __int128> : detail::integral_hasher<unsigned __int128> {
 };
 
 template <>
@@ -262,3 +302,4 @@ uint64_t hashRow(
   return hash;
 }
 
+} // namespace velox::hash
