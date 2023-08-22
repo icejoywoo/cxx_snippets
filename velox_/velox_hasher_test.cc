@@ -2,7 +2,7 @@
 
 #include "folly/hash/Hash.h"
 
-#include "my_hasher.hpp"
+#include "velox_hasher.hpp"
 
 TEST(HasherTest, Basic) {
     using namespace velox::hash;
