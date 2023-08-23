@@ -40,8 +40,8 @@ inline uint64_t hashInt(Int value) {
 }
 
 // VariableWidthBlock hash
-inline uint64_t hashBlock(const std::string& s) {
-    return XXHash64::hash((void*)s.c_str(), (uint64_t)s.length(), 0);
+inline uint64_t hashBlock(const std::string_view& s) {
+    return XXHash64::hash((void*)s.data(), (uint64_t)s.length(), 0);
 }
 
 // UnscaledDecimal128Arithmetic, LongDecimalType.hash
@@ -161,6 +161,13 @@ struct hasher<bool> {
 template <>
 struct hasher<std::string> {
     constexpr uint64_t operator()(const std::string& value) const noexcept {
+        return hashBlock(value);
+    }
+};
+
+template <>
+struct hasher<std::string_view> {
+    constexpr uint64_t operator()(const std::string_view& value) const noexcept {
         return hashBlock(value);
     }
 };

@@ -54,6 +54,7 @@ TEST(HasherTest, PrestoHasher) {
     EXPECT_EQ(4377401589546549230ULL, hasher<__uint128_t>()(7));
 
     EXPECT_EQ(1653941477270029236ULL, hasher<std::string>{}("abcde_bcdefgh_abcdefghxxxxxxx"));
+    EXPECT_EQ(1653941477270029236ULL, hasher<std::string_view>{}("abcde_bcdefgh_abcdefghxxxxxxx"));
 
     EXPECT_EQ(11019090683627472466ULL, hashArray<int>({0, 1, 2, 3, 4}));
     EXPECT_EQ(4922154480287828680ULL, hashArray<std::string>({"0", "1", "2", "3", "4"}));
