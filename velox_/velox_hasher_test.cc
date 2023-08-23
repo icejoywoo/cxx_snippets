@@ -23,31 +23,24 @@ TEST(HasherTest, VeloxHasher) {
     // std::cout << hasher<std::pair<int, int>>{}(std::make_pair(7, 8)) << std::endl;
     // std::cout << folly::hasher<std::pair<int, int>>()(std::make_pair(7, 8)) << std::endl;
     // macro 中 std::pair<int, int> 范型的类型中的逗号，会导致 macro 报错
-    typedef std::pair<int, int> int_pair;
-    EXPECT_EQ(hasher<int_pair>{}({7, 8}), folly::hasher<int_pair>{}({7, 8}));
+    EXPECT_EQ((hasher<std::pair<int, int>>{}({7, 8})), (folly::hasher<std::pair<int, int>>{}({7, 8})));
 
     const std::string input("abcde_bcdefgh_abcdefghxxxxxxx");
     EXPECT_EQ(hasher<std::string>{}(input), folly::hasher<std::string>{}(input));
     // string_view
     EXPECT_EQ(hasher<std::string_view>{}(input), folly::hasher<std::string_view>{}(input));
 
-    for (int i : {0, 1, 2, 3, 4}) {
-        std::cout << "hash " << i << ": " << hasher<int>{}(i) << std::endl;
-    }
-    std::cout << "hash array: " << hashArray<int>({0, 1, 2, 3, 4}) << std::endl;
-    std::cout << "hash array: " << hasher<std::vector<int>>{}({0, 1, 2, 3, 4}) << std::endl;
-    // 4971740975845359195
-    std::cout << "hash string array: " << hashArray<std::string>({"0", "1", "2", "3", "4"}) << std::endl;
-    std::cout << "hash string array: " << hasher<std::vector<std::string>>{}({"0", "1", "2", "3", "4"}) << std::endl;
-    // 17820802234886935425
-    std::cout << "hash row: " << hashRow<int>({0, 1, 2, 3, 4}) << std::endl;
-    // 8795432144090112219
-    std::cout << "hash map: " << hashMap<int, int>({{1, 1}, {2, 2}}) << std::endl;
-    std::cout << "hash map: " << hasher<std::map<int, int>>{}({{1, 1}, {2, 2}}) << std::endl;
-    // 14742748263231395393
-    std::cout << "hash map: " << hashMap<int, int>({{2, 102}, {3, 103}}) << std::endl;
-    std::cout << "hash map: " << hasher<std::map<int, int>>{}({{2, 102}, {3, 103}}) << std::endl;
-    // 18340151164760653449
+    EXPECT_EQ(4971740975845359195ULL, hashArray<int>({0, 1, 2, 3, 4}));
+    EXPECT_EQ(4971740975845359195ULL, hasher<std::vector<int>>{}({0, 1, 2, 3, 4}));
+    EXPECT_EQ(17820802234886935425ULL, hashArray<std::string>({"0", "1", "2", "3", "4"}));
+    EXPECT_EQ(17820802234886935425ULL, hasher<std::vector<std::string>>{}({"0", "1", "2", "3", "4"}));
+    EXPECT_EQ(8795432144090112219ULL, hashRow<int>({0, 1, 2, 3, 4}));
+    // c++ macro template comma
+    // https://stackoverflow.com/questions/4496842/pass-method-with-template-arguments-to-a-macro
+    EXPECT_EQ(14742748263231395393ULL, (hashMap<int, int>({{1, 1}, {2, 2}})));
+    EXPECT_EQ(14742748263231395393ULL, (hasher<std::map<int, int>>{}({{1, 1}, {2, 2}})));
+    EXPECT_EQ(18340151164760653449ULL, (hashMap<int, int>({{2, 102}, {3, 103}})));
+    EXPECT_EQ(18340151164760653449ULL, (hasher<std::map<int, int>>{}({{2, 102}, {3, 103}})));
 }
 
 TEST(HasherTest, PrestoHasher) {
@@ -60,20 +53,11 @@ TEST(HasherTest, PrestoHasher) {
     EXPECT_EQ(17963733647471017984ULL, hasher<double>()(7));
     EXPECT_EQ(4377401589546549230ULL, hasher<__uint128_t>()(7));
 
-    const std::string input("abcde_bcdefgh_abcdefghxxxxxxx");
-    EXPECT_EQ(1653941477270029236ULL, hasher<std::string>{}(input));
+    EXPECT_EQ(1653941477270029236ULL, hasher<std::string>{}("abcde_bcdefgh_abcdefghxxxxxxx"));
 
-    for (int i : {0, 1, 2, 3, 4}) {
-        std::cout << "hash " << i << ": " << hasher<int>{}(i) << std::endl;
-    }
-    std::cout << "hash array: " << hashArray<int>({0, 1, 2, 3, 4}) << std::endl;
-    // 11019090683627472466
-    std::cout << "hash string array: " << hashArray<std::string>({"0", "1", "2", "3", "4"}) << std::endl;
-    // 4922154480287828680
-    std::cout << "hash row: " << hashRow<int, std::string>(28, "abcde_bcdefgh_abcdefghxxxxxxx") << std::endl;
-    // 12054807849381078285
-    std::cout << "hash map: " << hashMap<int, int>({{1, 1}, {2, 2}}) << std::endl;
-    // 0
-    std::cout << "hash map: " << hashMap<int, int>({{2, 102}, {3, 103}}) << std::endl;
-    // 14482330732929925071
+    EXPECT_EQ(11019090683627472466ULL, hashArray<int>({0, 1, 2, 3, 4}));
+    EXPECT_EQ(4922154480287828680ULL, hashArray<std::string>({"0", "1", "2", "3", "4"}));
+    EXPECT_EQ(12054807849381078285ULL, (hashRow<int, std::string>(28, "abcde_bcdefgh_abcdefghxxxxxxx")));
+    EXPECT_EQ(0ULL, (hashMap<int, int>({{1, 1}, {2, 2}})));
+    EXPECT_EQ(14482330732929925071ULL, (hashMap<int, int>({{2, 102}, {3, 103}})));
 }

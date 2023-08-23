@@ -23,7 +23,6 @@ TEST_F(ComplexVectorHasherTest, arrayVector) {
     raw_vector<uint64_t> hashes(len);
     std::fill(hashes.begin(), hashes.end(), 0);
     hasher->hash(rows, false, hashes);
-    std::cout << "{0, 1, 2, 3, 4} hash:" << hashes[len - 1] << std::endl;
     EXPECT_EQ(4971740975845359195UL, hashes[len-1]);
   }
   {
@@ -42,7 +41,6 @@ TEST_F(ComplexVectorHasherTest, arrayVector) {
     raw_vector<uint64_t> hashes(len);
     std::fill(hashes.begin(), hashes.end(), 0);
     hasher->hash(rows, false, hashes);
-    std::cout << "{'0', '1', '2', '3', '4'} hash:" << hashes[len - 1] << std::endl;
     EXPECT_EQ(17820802234886935425UL, hashes[len-1]);
   }
 }
