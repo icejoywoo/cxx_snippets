@@ -210,6 +210,13 @@ uint64_t hashArray(std::vector<T> array) {
     return result;
 }
 
+template <typename T>
+struct hasher<std::vector<T>> {
+    size_t operator()(const std::vector<T>& elements) const {
+        return hashArray(elements);
+    }
+};
+
 template <typename Key, typename Value>
 uint64_t hashMap(std::map<Key, Value> m) {
     uint64_t result = 0;
@@ -218,6 +225,14 @@ uint64_t hashMap(std::map<Key, Value> m) {
     }
     return result;
 }
+
+template <typename Key, typename Value>
+struct hasher<std::map<Key, Value>> {
+    size_t operator()(const std::map<Key, Value>& elements) const {
+        return hashMap(elements);
+    }
+};
+
 template <size_t I = 0, typename FuncT, typename... Tp>
 inline typename std::enable_if_t<I == sizeof...(Tp)> for_each(
         std::tuple<Tp...>&,
