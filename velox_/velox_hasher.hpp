@@ -109,11 +109,11 @@ template <typename Int>
 struct integral_hasher {
 constexpr size_t operator()(Int const& i) const noexcept {
     static_assert(sizeof(Int) <= 16, "Input type is too wide");
-    /* constexpr */ if (sizeof(Int) <= 4) {
+    if constexpr (sizeof(Int) <= 4) {
         auto const i32 = static_cast<int32_t>(i); // impl accident: sign-extends
         auto const u32 = static_cast<uint32_t>(i32);
         return static_cast<size_t>(jenkins_rev_mix32(u32));
-    } else if (sizeof(Int) <= 8) {
+    } else if constexpr (sizeof(Int) <= 8) {
         auto const u64 = static_cast<uint64_t>(i);
         return static_cast<size_t>(twang_mix64(u64));
     } else {

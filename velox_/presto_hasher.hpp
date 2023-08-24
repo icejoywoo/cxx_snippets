@@ -81,7 +81,7 @@ namespace detail {
                 auto const i32 = static_cast<int32_t>(i); // impl accident: sign-extends
                 auto const u32 = static_cast<uint32_t>(i32);
                 return static_cast<uint64_t>(hashInt(u32));
-            } else if (sizeof(Int) <= 8) {
+            } else if constexpr (sizeof(Int) <= 8) {
                 auto const u64 = static_cast<uint64_t>(i);
                 return static_cast<uint64_t>(hashInt(u64));
             } else {
