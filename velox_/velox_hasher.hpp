@@ -217,8 +217,6 @@ struct hasher<std::pair<T1, T2>> {
 
 template <>
 struct hasher<bool> {
-  using folly_is_avalanching = std::true_type;
-
   constexpr size_t operator()(bool key) const noexcept {
     // Make sure that all the output bits depend on the input.
     return key ? std::numeric_limits<size_t>::max() : 0;
