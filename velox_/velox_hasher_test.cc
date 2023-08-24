@@ -34,7 +34,7 @@ TEST(HasherTest, VeloxHasher) {
     EXPECT_EQ(4971740975845359195ULL, hasher<std::vector<int>>{}({0, 1, 2, 3, 4}));
     EXPECT_EQ(17820802234886935425ULL, hashArray<std::string>({"0", "1", "2", "3", "4"}));
     EXPECT_EQ(17820802234886935425ULL, hasher<std::vector<std::string>>{}({"0", "1", "2", "3", "4"}));
-    EXPECT_EQ(8795432144090112219ULL, hashRow<int>({0, 1, 2, 3, 4}));
+    EXPECT_EQ(8795432144090112219ULL, (hashRow<int, int, int, int, int>(0, 1, 2, 3, 4)));
     // c++ macro template comma
     // https://stackoverflow.com/questions/4496842/pass-method-with-template-arguments-to-a-macro
     EXPECT_EQ(14742748263231395393ULL, (hashMap<int, int>({{1, 1}, {2, 2}})));

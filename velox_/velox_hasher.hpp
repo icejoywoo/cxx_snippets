@@ -288,17 +288,26 @@ struct hasher<std::map<Key, Value>> {
   }
 };
 
-template <typename T>
-uint64_t hashRow(
-    const std::vector<T>& elements) {
+template <size_t I = 0, typename FuncT, typename... Tp>
+inline typename std::enable_if_t<I == sizeof...(Tp)> for_each(
+    std::tuple<Tp...>&,
+    FuncT) {}
+
+template <size_t I = 0, typename FuncT, typename... Tp>
+    inline typename std::enable_if_t <
+    I<sizeof...(Tp)> for_each(std::tuple<Tp...>& t, FuncT f) {
+  f(std::get<I>(t));
+  for_each<I + 1, FuncT, Tp...>(t, f);
+}
+
+template <typename T, typename... Args>
+uint64_t hashRow(const T& t, const Args&... args) {
   uint64_t hash = nullHash;
-  bool isFirst = true;
-  for (auto i = 0; i < elements.size(); ++i) {
-    auto element = elements[i];
-    auto elementHash = hasher<T>{}(element);
-    hash = isFirst ? elementHash : hashMix(hash, elementHash);
-    isFirst = false;
-  }
+  hash = hasher<T>{}(t);
+  auto a = std::forward_as_tuple(args...);
+  for_each(a, [&hash](auto x) {
+    hash = hashMix(hash, hasher<decltype(x)>{}(x));
+  });
   return hash;
 }
 
