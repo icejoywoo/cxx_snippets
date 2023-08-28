@@ -52,7 +52,7 @@ TEST_P(CompressionTest, Lz4) {
         std::cout << "uncompressed: " << out2 << std::endl;
         assert(out2 == input);
     }
-}
+};
 
 TEST_F(CompressionTest, Snappy) {
     using namespace folly;
@@ -77,7 +77,7 @@ TEST_F(CompressionTest, Snappy) {
     }
     std::cout << "uncompressed: " << out2 << std::endl;
     assert(out2 == input);
-}
+};
 
 INSTANTIATE_TEST_CASE_P(Lz4, CompressionTest, ::testing::Values(
   folly::io::CodecType::LZ4,
@@ -106,4 +106,65 @@ TEST_F(CompressionTest, MyLz4SimpleTest) {
             uncompressed_buffer, 0, uncompressed_length);
 
     EXPECT_STREQ(input.c_str(), folly::ByteRange(uncompressed_buffer, actualUncompressedSize).str().c_str());
+};
+namespace {
+std::string generateRandomString(int length, time_t seed = 0) {
+  std::string result = "";
+  static std::string characters =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  // 设置随机种子为当前时间 + seed
+  std::srand(std::time(0) + seed);
+
+  for (int i = 0; i < length; i++) {
+    int randomIndex = std::rand() % characters.length();
+    result += characters[randomIndex];
+  }
+
+  return result;
 }
+} // anonymous namespace
+
+TEST_F(CompressionTest, MyLz4AndFollyLz4Compatibility) {
+    for (int i = 0; i < 100; i++) {
+        const std::string input = generateRandomString(20 + (i / 10 * 10), i);
+        uint32_t output_length = my::lz4::compressor::maxCompressedLength(input.length());
+        auto* output = new uint8_t[output_length];
+        memset(output, 0, output_length);
+        int actualCompressedLength = my::lz4::compressor::compress(
+                (uint8_t*) input.data(), 0, input.length(),
+                output, 0, output_length);
+
+        std::string compressed_str = folly::ByteRange(output, actualCompressedLength).str();
+
+        auto codec = folly::io::getCodec(folly::io::CodecType::LZ4);
+        std::unique_ptr<folly::IOBuf> compressedBuf = folly::IOBuf::copyBuffer(compressed_str);
+        std::unique_ptr<folly::IOBuf> uncompressedBuf = codec->uncompress(compressedBuf.get(), input.size());
+        std::string uncompressedStr;
+        for(auto& b : *uncompressedBuf) {
+            uncompressedStr.append(b.begin(), b.end());
+        }
+        EXPECT_STREQ(input.c_str(), uncompressedStr.c_str());
+    }
+
+    for (int i = 0; i < 100; i++) {
+        const std::string input = generateRandomString(20 + (i / 10 * 10), i);
+        auto codec = folly::io::getCodec(folly::io::CodecType::LZ4);
+        std::unique_ptr<folly::IOBuf> buf = folly::IOBuf::copyBuffer(input);
+        std::unique_ptr<folly::IOBuf> compressedBuf = codec->compress(buf.get());
+        // write each part to a string
+        std::string compressedStr;
+        for(auto& b : *compressedBuf) {
+            compressedStr.append(b.begin(), b.end());
+        }
+
+        uint32_t uncompressed_length = input.length();
+        auto* uncompressed_buffer = new uint8_t[uncompressed_length];
+        memset(uncompressed_buffer, 0, uncompressed_length);
+        int actualUncompressedSize = my::lz4::decompressor::decompress(
+                (uint8_t*) compressedStr.data(), 0, compressedStr.length(),
+                uncompressed_buffer, 0, uncompressed_length);
+
+        EXPECT_STREQ(input.c_str(), folly::ByteRange(uncompressed_buffer, actualUncompressedSize).str().c_str());
+    }
+};
