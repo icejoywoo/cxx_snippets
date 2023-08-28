@@ -126,7 +126,7 @@ std::string generateRandomString(int length, time_t seed = 0) {
 } // anonymous namespace
 
 TEST_F(CompressionTest, MyLz4AndFollyLz4Compatibility) {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10000; i++) {
         const std::string input = generateRandomString(20 + (i / 10 * 10), i);
         uint32_t output_length = my::lz4::compressor::maxCompressedLength(input.length());
         auto* output = new uint8_t[output_length];
@@ -147,7 +147,7 @@ TEST_F(CompressionTest, MyLz4AndFollyLz4Compatibility) {
         EXPECT_STREQ(input.c_str(), uncompressedStr.c_str());
     }
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10000; i++) {
         const std::string input = generateRandomString(20 + (i / 10 * 10), i);
         auto codec = folly::io::getCodec(folly::io::CodecType::LZ4);
         std::unique_ptr<folly::IOBuf> buf = folly::IOBuf::copyBuffer(input);

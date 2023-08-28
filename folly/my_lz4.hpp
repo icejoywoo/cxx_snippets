@@ -203,7 +203,8 @@ int compress(
         int* table)
 {
     int tableSize = computeTableSize(inputLength);
-    memset(table, 0, tableSize);
+    // initialize the table to {0}
+    memset(table, 0, tableSize * sizeof(int));
 
     int mask = tableSize - 1;
 
@@ -321,9 +322,9 @@ int compress(
 // Lz4Compressor
 int compress(uint8_t* input, int inputOffset, uint32_t inputLength, uint8_t* output, int outputOffset, uint32_t maxOutputLength)
 {
-    int* table = new int[MAX_TABLE_SIZE];
+    std::unique_ptr<int[]> table(new int[MAX_TABLE_SIZE]);
 
-    return compress(input, inputOffset, inputLength, output, outputOffset, maxOutputLength, table);
+    return compress(input, inputOffset, inputLength, output, outputOffset, maxOutputLength, table.get());
 }
 } // namespace compressor
 namespace decompressor {
