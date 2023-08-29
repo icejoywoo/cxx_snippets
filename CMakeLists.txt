@@ -77,6 +77,14 @@ else()
   set(FOLLY_BENCHMARK Folly::follybenchmark)
 endif()
 
+# TODO fix external dependencies
+# set_source(fizz)
+# resolve_dependency(fizz)
+# set_source(wangle)
+# resolve_dependency(wangle)
+# set_source(proxygen)
+# resolve_dependency(proxygen)
+
 set_source(GTest)
 resolve_dependency(GTest)
 
