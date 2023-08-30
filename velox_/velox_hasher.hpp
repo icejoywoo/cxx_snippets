@@ -309,4 +309,20 @@ uint64_t hashRow(const T& t, const Args&... args) {
   return hash;
 }
 
+template <typename... Ts>
+struct hasher<std::tuple<Ts...>> {
+  size_t operator()(const std::tuple<Ts...>& key) const {
+    uint64_t hash = nullHash;
+    bool isFirst = true;
+    std::apply([&hash, &isFirst](Ts... args) {
+      auto a = std::forward_as_tuple(args...);
+      for_each(a, [&hash, &isFirst](auto x) {
+        hash = isFirst ? hasher<decltype(x)>{}(x) : hashMix(hash, hasher<decltype(x)>{}(x));
+        isFirst = false;
+      });
+    }, key);
+    return hash;
+  }
+};
+
 } // namespace velox::hash

@@ -36,6 +36,9 @@ TEST(HasherTest, VeloxHasher) {
     EXPECT_EQ(17820802234886935425ULL, hasher<std::vector<std::string>>{}({"0", "1", "2", "3", "4"}));
     EXPECT_EQ(8795432144090112219ULL, (hashRow<int, int, int, int, int>(0, 1, 2, 3, 4)));
     EXPECT_EQ(jenkins_rev_mix32(7), (hashRow<int>(7)));
+    EXPECT_EQ(8795432144090112219ULL,
+              (hasher<std::tuple<int, int, int, int, int>>{}(std::make_tuple(0, 1, 2, 3, 4))));
+    EXPECT_EQ(jenkins_rev_mix32(7), (hasher<std::tuple<int>>{}(7)));
     // c++ macro template comma
     // https://stackoverflow.com/questions/4496842/pass-method-with-template-arguments-to-a-macro
     EXPECT_EQ(14742748263231395393ULL, (hashMap<int, int>({{1, 1}, {2, 2}})));
@@ -62,6 +65,7 @@ TEST(HasherTest, PrestoHasher) {
     EXPECT_EQ(4922154480287828680ULL, hashArray<std::string>({"0", "1", "2", "3", "4"}));
     EXPECT_EQ(4922154480287828680ULL, hasher<std::vector<std::string>>{}({"0", "1", "2", "3", "4"}));
     EXPECT_EQ(12054807849381078285ULL, (hashRow<int, std::string>(28, "abcde_bcdefgh_abcdefghxxxxxxx")));
+    EXPECT_EQ(12054807849381078285ULL, (hasher<std::tuple<int, std::string>>{}(std::make_tuple(28, "abcde_bcdefgh_abcdefghxxxxxxx"))));
     EXPECT_EQ(0ULL, (hashMap<int, int>({{1, 1}, {2, 2}})));
     EXPECT_EQ(0ULL, (hasher<std::map<int, int>>{}({{1, 1}, {2, 2}})));
     EXPECT_EQ(14482330732929925071ULL, (hashMap<int, int>({{2, 102}, {3, 103}})));

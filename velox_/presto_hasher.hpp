@@ -255,4 +255,18 @@ uint64_t hashRow(const T& t, const Args&... args) {
     });
     return hash;
 }
+
+template <typename... Ts>
+struct hasher<std::tuple<Ts...>> {
+  size_t operator()(const std::tuple<Ts...>& key) const {
+    uint64_t hash = 1;
+    std::apply([&hash](Ts... args) {
+      auto a = std::forward_as_tuple(args...);
+      for_each(a, [&hash](auto x) {
+        hash = combineHash(hash, hasher<decltype(x)>{}(x));
+      });
+    }, key);
+    return hash;
+  }
+};
 } // namespace presto::hash
