@@ -287,13 +287,12 @@ struct hasher<std::map<Key, Value>> {
 };
 
 template <size_t I = 0, typename FuncT, typename... Tp>
-inline typename std::enable_if_t<I == sizeof...(Tp)> for_each(
-    std::tuple<Tp...>&,
-    FuncT) {}
+inline typename std::enable_if_t<I == sizeof...(Tp)>
+    for_each(std::tuple<Tp...>&, FuncT) {}
 
 template <size_t I = 0, typename FuncT, typename... Tp>
-    inline typename std::enable_if_t <
-    I<sizeof...(Tp)> for_each(std::tuple<Tp...>& t, FuncT f) {
+inline typename std::enable_if_t <I<sizeof...(Tp)>
+    for_each(std::tuple<Tp...>& t, FuncT f) {
   f(std::get<I>(t));
   for_each<I + 1, FuncT, Tp...>(t, f);
 }
