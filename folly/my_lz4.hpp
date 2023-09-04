@@ -492,4 +492,97 @@ int decompress(
     return (int) (output - outputAddress);
 }
 } // decompressor
+/**
+ * LZ4 compression
+ */
+class LZ4Codec final : public folly::io::Codec {
+ public:
+  static std::unique_ptr<Codec> create();
+  explicit LZ4Codec();
+
+ private:
+  bool doNeedsUncompressedLength() const override;
+  uint64_t doMaxUncompressedLength() const override;
+  uint64_t doMaxCompressedLength(uint64_t uncompressedLength) const override;
+
+  std::unique_ptr<folly::IOBuf> doCompress(const folly::IOBuf* data) override;
+  std::unique_ptr<folly::IOBuf> doUncompress(
+      const folly::IOBuf* data, folly::Optional<uint64_t> uncompressedLength) override;
+};
+
+LZ4Codec::LZ4Codec()
+    : Codec(folly::io::CodecType::LZ4) {}
+
+std::unique_ptr<folly::io::Codec> LZ4Codec::create() {
+  return std::make_unique<LZ4Codec>();
+}
+
+bool LZ4Codec::doNeedsUncompressedLength() const {
+  return true;
+}
+
+uint64_t LZ4Codec::doMaxUncompressedLength() const {
+  // uses uint32_t for lengths, so there's that.
+  return std::numeric_limits<uint32_t>::max();
+}
+
+uint64_t LZ4Codec::doMaxCompressedLength(uint64_t uncompressedLength) const {
+  return xihe::compression::details::maxCompressedLength(uncompressedLength);
+}
+
+std::unique_ptr<folly::IOBuf> LZ4Codec::doCompress(const folly::IOBuf* data) {
+  folly::IOBuf clone;
+  if (data->isChained()) {
+    // LZ4 doesn't support streaming, so we have to coalesce
+    clone = data->cloneCoalescedAsValue();
+    data = &clone;
+  }
+
+  int maxLength = maxCompressedLength(data->length());
+  auto out = folly::IOBuf::create(maxLength);
+
+  auto input = reinterpret_cast<const char*>(data->data());
+  auto output = reinterpret_cast<char*>(out->writableTail());
+  const auto inputLength = data->length();
+
+  std::unique_ptr<int[]> table(new int[xihe::compression::details::MAX_TABLE_SIZE]);
+  int n = xihe::compression::details::compress((uint8_t*) input, 0, inputLength,
+                    (uint8_t*) output, 0, out->capacity(), table.get());
+
+  CHECK_GE(n, 0);
+  CHECK_LE(n, out->capacity());
+
+  out->append(n);
+  return out;
+}
+
+std::unique_ptr<folly::IOBuf> LZ4Codec::doUncompress(
+    const folly::IOBuf* data, folly::Optional<uint64_t> uncompressedLength) {
+  folly::IOBuf clone;
+  if (data->isChained()) {
+    // LZ4 doesn't support streaming, so we have to coalesce
+    clone = data->cloneCoalescedAsValue();
+    data = &clone;
+  }
+
+  folly::io::Cursor cursor(data);
+  // Invariants
+  DCHECK(uncompressedLength.has_value());
+  DCHECK(*uncompressedLength <= maxUncompressedLength());
+  uint64_t actualUncompressedLength = *uncompressedLength;
+
+  auto sp = folly::StringPiece{cursor.peekBytes()};
+  auto out = folly::IOBuf::create(actualUncompressedLength);
+
+  int n = xihe::compression::details::decompress(
+      (uint8_t*) sp.data(), 0, sp.size(),
+      reinterpret_cast<uint8_t*>(out->writableTail()), 0, actualUncompressedLength);
+
+  if (n < 0 || uint64_t(n) != actualUncompressedLength) {
+    throw std::runtime_error(
+        folly::to<std::string>("LZ4 decompression returned invalid value ", n));
+  }
+  out->append(actualUncompressedLength);
+  return out;
+}
 } // my::lz4
