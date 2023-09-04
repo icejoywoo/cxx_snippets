@@ -4,7 +4,7 @@
 #include "folly/io/IOBuf.h"
 #include "folly/String.h"
 
-#include "my_lz4.hpp"
+#include "my_lz4.h"
 
 // https://stackoverflow.com/a/6256846
 class CompressionTest : public ::testing::TestWithParam<folly::io::CodecType> {

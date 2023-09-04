@@ -1,38 +1,14 @@
-#pragma once
+#include "my_lz4.h"
+
+#include "folly/Conv.h"
+#include "folly/io/Cursor.h"
 
 #include <string>
 
 // ported from airlift compressor Lz4 java implementation
 namespace my::lz4 {
-// Lz4Constants
-int LAST_LITERAL_SIZE = 5;
-int MIN_MATCH = 4;
-
-int SIZE_OF_SHORT = 2;
-int SIZE_OF_INT = 4;
-int SIZE_OF_LONG = 8;
-
 namespace compressor {
-// Lz4RawCompressor
-int MAX_INPUT_SIZE = 0x7E000000;
-int HASH_LOG = 12;
-int MIN_TABLE_SIZE = 16;
-int MAX_TABLE_SIZE = (1 << HASH_LOG);
-int COPY_LENGTH = 8;
-int MATCH_FIND_LIMIT = COPY_LENGTH + MIN_MATCH;
-
-int MIN_LENGTH = MATCH_FIND_LIMIT + 1;
-
-int ML_BITS = 4;
-int ML_MASK = (1 << ML_BITS) - 1;
-int RUN_BITS = 8 - ML_BITS;
-int RUN_MASK = (1 << RUN_BITS) - 1;
-
-int MAX_DISTANCE = ((1 << 16) - 1);
-
-int SKIP_TRIGGER = 6;  /* Increase this value ==> compression run slower on incompressible data */
-
-uint32_t hash(uint64_t value, uint32_t mask)
+FOLLY_ALWAYS_INLINE uint32_t hash(uint64_t value, uint32_t mask)
 {
     // Multiplicative hash. It performs the equivalent to
     // this computation:
@@ -68,7 +44,7 @@ long encodeRunLength(
     return output;
 }
 
-uint32_t highestOneBit(uint32_t n) {
+FOLLY_ALWAYS_INLINE uint32_t highestOneBit(uint32_t n) {
     n |= (n >>  1);
     n |= (n >>  2);
     n |= (n >>  4);
@@ -77,7 +53,7 @@ uint32_t highestOneBit(uint32_t n) {
     return n - (n >> 1);
 }
 
-uint32_t numberOfTrailingZeros(uint64_t i) {
+FOLLY_ALWAYS_INLINE uint32_t numberOfTrailingZeros(uint64_t i) {
     // HD, Figure 5-14
     uint32_t x, y;
     if (i == 0) return 64;
@@ -186,11 +162,6 @@ long emitLiteral(uint8_t* inputBase, uint8_t* outputBase, long input, int litera
     while (output < outputLimit);
 
     return outputLimit;
-}
-
-uint32_t maxCompressedLength(uint32_t sourceLength)
-{
-    return sourceLength + sourceLength / 255 + 16;
 }
 
 int compress(
@@ -320,7 +291,13 @@ int compress(
 }
 
 // Lz4Compressor
-int compress(uint8_t* input, int inputOffset, uint32_t inputLength, uint8_t* output, int outputOffset, uint32_t maxOutputLength)
+int compress(
+    uint8_t* input,
+    int inputOffset,
+    uint32_t inputLength,
+    uint8_t* output,
+    int outputOffset,
+    uint32_t maxOutputLength)
 {
     std::unique_ptr<int[]> table(new int[MAX_TABLE_SIZE]);
 
@@ -328,12 +305,6 @@ int compress(uint8_t* input, int inputOffset, uint32_t inputLength, uint8_t* out
 }
 } // namespace compressor
 namespace decompressor {
-// Lz4RawDecompressor
-int DEC_32_TABLE[]{4, 1, 2, 1, 4, 4, 4, 4};
-int DEC_64_TABLE[]{0, 0, 0, -1, 0, 1, 2, 3};
-
-int OFFSET_SIZE = 2;
-int TOKEN_SIZE = 1;
 
 int decompress(
         uint8_t* inputBase,
@@ -492,23 +463,6 @@ int decompress(
     return (int) (output - outputAddress);
 }
 } // decompressor
-/**
- * LZ4 compression
- */
-class LZ4Codec final : public folly::io::Codec {
- public:
-  static std::unique_ptr<Codec> create();
-  explicit LZ4Codec();
-
- private:
-  bool doNeedsUncompressedLength() const override;
-  uint64_t doMaxUncompressedLength() const override;
-  uint64_t doMaxCompressedLength(uint64_t uncompressedLength) const override;
-
-  std::unique_ptr<folly::IOBuf> doCompress(const folly::IOBuf* data) override;
-  std::unique_ptr<folly::IOBuf> doUncompress(
-      const folly::IOBuf* data, folly::Optional<uint64_t> uncompressedLength) override;
-};
 
 LZ4Codec::LZ4Codec()
     : Codec(folly::io::CodecType::LZ4) {}
@@ -527,7 +481,7 @@ uint64_t LZ4Codec::doMaxUncompressedLength() const {
 }
 
 uint64_t LZ4Codec::doMaxCompressedLength(uint64_t uncompressedLength) const {
-  return xihe::compression::details::maxCompressedLength(uncompressedLength);
+  return compressor::maxCompressedLength(uncompressedLength);
 }
 
 std::unique_ptr<folly::IOBuf> LZ4Codec::doCompress(const folly::IOBuf* data) {
@@ -538,15 +492,15 @@ std::unique_ptr<folly::IOBuf> LZ4Codec::doCompress(const folly::IOBuf* data) {
     data = &clone;
   }
 
-  int maxLength = maxCompressedLength(data->length());
+  int maxLength = compressor::maxCompressedLength(data->length());
   auto out = folly::IOBuf::create(maxLength);
 
   auto input = reinterpret_cast<const char*>(data->data());
   auto output = reinterpret_cast<char*>(out->writableTail());
   const auto inputLength = data->length();
 
-  std::unique_ptr<int[]> table(new int[xihe::compression::details::MAX_TABLE_SIZE]);
-  int n = xihe::compression::details::compress((uint8_t*) input, 0, inputLength,
+  std::unique_ptr<int[]> table(new int[compressor::MAX_TABLE_SIZE]);
+  int n = compressor::compress((uint8_t*) input, 0, inputLength,
                     (uint8_t*) output, 0, out->capacity(), table.get());
 
   CHECK_GE(n, 0);
@@ -574,7 +528,7 @@ std::unique_ptr<folly::IOBuf> LZ4Codec::doUncompress(
   auto sp = folly::StringPiece{cursor.peekBytes()};
   auto out = folly::IOBuf::create(actualUncompressedLength);
 
-  int n = xihe::compression::details::decompress(
+  int n = decompressor::decompress(
       (uint8_t*) sp.data(), 0, sp.size(),
       reinterpret_cast<uint8_t*>(out->writableTail()), 0, actualUncompressedLength);
 
