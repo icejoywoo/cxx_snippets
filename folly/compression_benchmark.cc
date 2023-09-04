@@ -5,18 +5,21 @@
 #include "my_lz4.h"
 
 std::string generateRandomString(int length, time_t seed = 0) {
-  std::string result = "";
-  static std::string characters =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
+  std::string result;
+  result.reserve(length);
   // 设置随机种子为当前时间 + seed
   std::srand(std::time(0) + seed);
 
-  for (int i = 0; i < length; i++) {
-    int randomIndex = std::rand() % characters.length();
-    result += characters[randomIndex];
+  int loop4 = length / 4;
+  for (int i = 0; i < loop4; i++) {
+    int tmp = std::rand();
+    result.append(reinterpret_cast<char*>(&tmp), sizeof(int));
   }
 
+  int left = length % 4;
+  for (int i = 0; i < left; i++) {
+    result += (char) (std::rand() % 256);
+  }
   return result;
 }
 
