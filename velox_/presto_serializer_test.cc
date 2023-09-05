@@ -4,15 +4,12 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "velox/common/base/tests/GTestUtils.h"
 #include "velox/common/memory/ByteStream.h"
 #include "velox/expression/ComplexViewTypes.h"
 #include "velox/expression/VectorReaders.h"
 #include "velox/expression/VectorWriters.h"
-#include "velox/functions/prestosql/types/TimestampWithTimeZoneType.h"
 #include "velox/vector/BaseVector.h"
 #include "velox/vector/ComplexVector.h"
-#include "velox/vector/fuzzer/VectorFuzzer.h"
 #include "velox/vector/tests/utils/VectorTestBase.h"
 
 using namespace facebook::velox;
@@ -106,7 +103,7 @@ protected:
    RowVectorPtr result;
    serde_->deserialize(
        byteStream.get(), pool_.get(), rowType, &result, &paramOptions);
-   ASSERT_TRUE(byteStream->atEnd());
+   EXPECT_TRUE(byteStream->atEnd());
    return result;
  }
 
@@ -305,7 +302,7 @@ TEST_P(MyPrestoSerializerTest, nestedMap) {
          if (!first) {
            std::cout << ",";
          }
-         std::cout << (i.has_value() ? std::to_string(i.value()) : "");
+         std::cout << (i.has_value() ? std::to_string(i.value()) : "null");
          first = false;
        }
        std::cout << "], ";
@@ -320,8 +317,8 @@ TEST_P(MyPrestoSerializerTest, nestedMap) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-   PrestoSerializerTest,
-   PrestoSerializerTest,
+   MyPrestoSerializerTest,
+   MyPrestoSerializerTest,
    ::testing::Values(
        common::CompressionKind::CompressionKind_NONE,
        common::CompressionKind::CompressionKind_ZLIB,

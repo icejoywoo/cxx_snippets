@@ -9,6 +9,7 @@ target_link_libraries(velox_unit_test PRIVATE
   xsimd
   spooky_hash
   velox_exec
+  velox_presto_serializer
   velox_vector_test_lib)
 target_compile_features(velox_unit_test PRIVATE
   cxx_std_17)
