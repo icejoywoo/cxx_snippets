@@ -7,6 +7,9 @@ include(FetchContent)
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
+# https://www.jetbrains.com/help/clion/google-sanitizers.html#CompilerFlags
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g")
+
 execute_process(
         COMMAND
         bash -c
