@@ -35,23 +35,25 @@ BENCHMARK_RELATIVE(string_view_substr, n) {
 
 BENCHMARK_DRAW_LINE();
 
-constexpr int factor = 1000000;
-
 BENCHMARK(string_without_reserve, n) {
-  std::string result;
-  size_t size = n * factor;
-  for (unsigned int i = 0; i < size; ++i) {
-    result.push_back(i);
+  for (unsigned int i = 0; i < n; ++i) {
+    int size = 100;
+    std::string result;
+    for (unsigned int j = 0; j < size; ++j) {
+      result.push_back(j);
+    }
     folly::doNotOptimizeAway(result);
   }
 }
 
 BENCHMARK_RELATIVE(string_with_reserve, n) {
-  std::string result;
-  size_t size = n * factor;
-  result.reserve(size);
-  for (unsigned int i = 0; i < size; ++i) {
-    result.push_back(i);
+  for (unsigned int i = 0; i < n; ++i) {
+    int size = 100;
+    std::string result;
+    result.reserve(size);
+    for (unsigned int j = 0; j < size; ++j) {
+      result.push_back(j);
+    }
     folly::doNotOptimizeAway(result);
   }
 }
@@ -59,20 +61,24 @@ BENCHMARK_RELATIVE(string_with_reserve, n) {
 BENCHMARK_DRAW_LINE();
 
 BENCHMARK(vector_without_reserve, n) {
-  std::vector<unsigned int> result;
-  size_t size = n * factor;
-  for (unsigned int i = 0; i < size; ++i) {
-    result.push_back(i);
+  for (unsigned int i = 0; i < n; ++i) {
+    int size = 100;
+    std::vector<unsigned int> result;
+    for (unsigned int j = 0; j < size; ++j) {
+      result.push_back(j);
+    }
     folly::doNotOptimizeAway(result);
   }
 }
 
 BENCHMARK_RELATIVE(vector_with_reserve, n) {
-  size_t size = n * factor;
-  std::vector<unsigned int> result;
-  result.reserve(size);
-  for (unsigned int i = 0; i < size; ++i) {
-    result.push_back(i);
+  for (unsigned int i = 0; i < n; ++i) {
+    int size = 100;
+    std::vector<unsigned int> result;
+    result.reserve(size);
+    for (unsigned int j = 0; j < size; ++j) {
+      result.push_back(j);
+    }
     folly::doNotOptimizeAway(result);
   }
 }
