@@ -69,6 +69,8 @@ enable_testing()
 set_source(fmt)
 resolve_dependency(fmt)
 
+set_source(Boost)
+resolve_dependency(Boost)
 
 # Locate or build folly.
 add_compile_definitions(FOLLY_HAVE_INT128_T=1)

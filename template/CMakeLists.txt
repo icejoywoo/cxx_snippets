@@ -1,10 +1,12 @@
 add_executable(template_unit_test
-    function_types_test.cc)
+  function_types_test.cc
+  type_display_test.cc)
 target_link_libraries(template_unit_test PRIVATE
-    GTest::gtest
-    GTest::gtest_main)
+  GTest::gtest
+  GTest::gtest_main
+  Boost::headers)
 target_compile_features(template_unit_test PRIVATE
-    cxx_std_17)
+  cxx_std_17)
 
 add_test(template_unit_test template_unit_test)
 
