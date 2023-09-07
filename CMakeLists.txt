@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(velox_snippets)
+project(cxx_snippets)
 
 # enable FetchContent
 include(FetchContent)
