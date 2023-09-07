@@ -83,6 +83,38 @@ BENCHMARK_RELATIVE(vector_with_reserve, n) {
   }
 }
 
+BENCHMARK_DRAW_LINE();
+
+BENCHMARK(map_iterate_without_auto, n) {
+  for (unsigned int i = 0; i < n; ++i) {
+    int size = 100;
+    std::unordered_map<std::string, int> result;
+    for (int j = 0; j < size; ++j) {
+      result.insert({std::to_string(j), j});
+    }
+    // 正确的 pair 应该是：std::pair<const std::string, int>
+    // 写错类型会导致拷贝
+    for (std::pair<std::string, int> p : result) {
+      folly::doNotOptimizeAway(p);
+    }
+    folly::doNotOptimizeAway(result);
+  }
+}
+
+BENCHMARK_RELATIVE(map_iterate_with_auto, n) {
+  for (unsigned int i = 0; i < n; ++i) {
+    int size = 100;
+    std::unordered_map<std::string, int> result;
+    for (int j = 0; j < size; ++j) {
+      result.insert({std::to_string(j), j});
+    }
+    for (auto p : result) {
+      folly::doNotOptimizeAway(p);
+    }
+    folly::doNotOptimizeAway(result);
+  }
+}
+
 int main() {
   // init input strings
   for (int i = 0; i < INPUT_LENGTH; i++) {
